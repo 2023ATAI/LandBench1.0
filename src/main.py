@@ -17,6 +17,8 @@ from config import get_args
 import torch
 # ------------------------------------------------------------------------------ 
 # Original author : Qingliang Li, Cheng Zhang, 12/23/2022
+# Edited by Gan Li	
+# Inspired by Lu Li
 # ------------------------------------------------------------------------------
 
 def main(cfg):
