@@ -1,4 +1,4 @@
-# LandBench1.0
+# LandBench1.0 （regularly update annotations）
 # Operation sequence
 
 # 1.Download data to local
