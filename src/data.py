@@ -69,7 +69,7 @@ class Dataset():
             'silt_0-5cm_mean':'Band1',
             'soil_water_capacity':'SC'}
     def fit(self,cfg):
-        # 得到我们需要转化的目的数据的路径
+        # Get the original data file path 
         PATH = self.inputs_path+self.product+'/'+str(self.s_resolution)+'/'
         data_path = cfg['nc_data_path']+ self.product+'/'+str(self.s_resolution)+'/'        
         print(PATH)
@@ -79,7 +79,7 @@ class Dataset():
         begin_year = self.selected_year[0]
         end_year = self.selected_year[1]
 
-	#加载forcing数据
+	#Load forcing data
         forcing_list = []
         day_list = []
 
@@ -114,7 +114,8 @@ class Dataset():
         else:
             lat = np.load(PATH+lat_file_name)
             lon = np.load(PATH+lon_file_name)      
-	#对数据进行memmap映射   是为了处理数据量过大的问题               
+	#Determine whether to perform memmap mapping   
+	#Memmap is to deal with the problem of excessive amount of data             
         if cfg['memmap']:
             print("-------------------------")
             forcing = np.memmap(PATH+'forcing_memmap.npy',dtype=cfg['data_type'],mode='w+',shape=(np.sum(day_list,axis=0),forcing_list[0].shape[1],forcing_list[0].shape[2],forcing_list[0].shape[3]))
@@ -144,7 +145,7 @@ class Dataset():
             lat, lon = np.load(PATH+lat_file_name), np.load(PATH+lon_file_name)
 # ------------------------------------------------------------------------------------------------------------------------------
         print('[ATAI {d_p} work ] loading land surface data'.format(d_p=cfg['workname']))
-	#加载land_surface数据
+	#Load land_surface data
         land_surface_list = []
         for year in range(begin_year, end_year+1):
             file_name_land_surface = 'ERA5-Land_land_surface {sr} spatial resolution {year}.npy'.format(sr=self.s_resolution,year=year)
@@ -161,7 +162,7 @@ class Dataset():
             data = np.load(PATH+file_name_land_surface,mmap_mode='r')
             land_surface_list.append(data)
             #print(str(year)+':'+str(data.shape))
-	#对数据进行memmap映射   是为了处理数据量过大的问题   
+	##Determine whether to perform memmap mapping   
         if cfg['memmap']:
             
             land_surface=np.memmap(PATH+'land_surface_memmap.npy',dtype=cfg['data_type'],
@@ -188,7 +189,8 @@ class Dataset():
         #print(land_surface[-1,:,100,:])
 # ------------------------------------------------------------------------------------------------------------------------------
         print('[ATAI {d_p} work ] loading label'.format(d_p=cfg['workname']))
-	#加载label数据  默认的label是volumetric_soil_water_layer_20
+	#Load label data 
+	#The default label is volumetric_soil_water_layer_20
         label = []
         for year in range(begin_year, end_year + 1):
             file_name_label = 'ERA5_LAND_label_{sr}_{year}.npy'.format(sr=self.s_resolution,year=year)
@@ -221,7 +223,7 @@ class Dataset():
 # ------------------------------------------------------------------------------------------------------------------------------
         #static = np.ones((label.shape[1],label.shape[2],2))
         print(' ATAI {d_p} work ] loading ancillary'.format(d_p=cfg['workname']))
-	#加载static_norm数据
+	#Load static_norm data
         if not os.path.exists(PATH + 'static_norm.npy'):
             static = []
             for i in range(len(self.static_list)):
@@ -248,7 +250,7 @@ class Dataset():
             static = np.load(PATH+'static_norm.npy')
 
 # ------------------------------------------------------------------------------------------------------------------------------
-	#划分和创建训练以及测试数据集
+	#Partition and create datasets
         print('begin:{begin_year}, end:{end_year}'.format(
             begin_year=self.selected_year[0], end_year=self.selected_year[1]))
         print('forcing shape is {shape}'.format(shape=forcing.shape))
@@ -270,7 +272,7 @@ class Dataset():
         print('[ATAI {d_p} work ] preprocessing for generating train and test data'.format(d_p=cfg['workname']))
         print('\033[1;31m%s\033[0m' %
           'The following process are all time-consuming, especially for the high-resolution data. Please wait patiently')
-	#划分和创建训练数据集  训练数据及默认是1990到2019年
+	#Create a training dataset；The default training data is 1990 to 2019.
         if not os.path.exists(PATH+'x_train.npy'):
             x_train = np.memmap(PATH+'x_train.npy',dtype=cfg['data_type'],mode='w+',shape=(self.time_length_f-N, self.nlat_f, self.nlon_f, self.num_features_f+self.num_features_l))
             x_train[:,:,:,:self.num_features_f] = forcing[:self.time_length_f-N]
@@ -283,7 +285,7 @@ class Dataset():
         y_train = label[:self.time_length_f-N]
         np.save(PATH + 'y_train.npy', y_train)
         print('[ATAI {d_p} work ] finish  generating y_train data, y_train shape is {yts}'.format(d_p=cfg['workname'],yts=y_train.shape))
-	#划分和创建测试数据集  测试数据集默认只有2020年
+	#Create a test dataset ；The default for the test dataset is only 2020
         if not os.path.exists(PATH+'x_test.npy'):
             x_test = np.memmap(PATH+'x_test.npy',dtype=cfg['data_type'],mode='w+',shape=(N, self.nlat_f, self.nlon_f, self.num_features_f+self.num_features_l))
             x_test[:,:,:,:self.num_features_f],x_test[:,:,:,self.num_features_f:] = forcing[self.time_length_f-N:],land_surface[self.time_length_f-N:]
@@ -299,8 +301,8 @@ class Dataset():
         if self.normalize:
             if not os.path.exists(PATH+'x_train_norm.npy') or not os.path.exists(PATH+'y_train_norm.npy'): 
                 print('ATAI {d_p} work ] start {nt} normalization forcing'.format(d_p=cfg['workname'],nt=cfg['normalize_type']))    
-		#采用的是最大最小归一化的方法       
-		#分成两种形式的归一化  一种是region注重于对单个个点的每纬特征  一种是gloabl 注重的全局                           
+		#Adopt maximum and minimum normalization    
+		#There are two forms of normalization：  region and gloabl                          
 		#####region
                 if cfg['normalize_type'] in ['region']:
                     scaler_x = np.memmap(PATH+'scaler_x.npy',dtype=cfg['data_type'],mode='w+',shape=(2, x_train.shape[1], x_train.shape[2], x_train.shape[3]))
@@ -376,7 +378,7 @@ class Dataset():
                     print('x_train_after_norm',x_train[:,:,68,1])
 # ------------------------------------------------------------------------------------------------------------------------------
 # save
-	    #保存归一化后的数据集
+	    #Save the normalized dataset
             np.save(PATH+'x_train_norm_shape.npy', x_train.shape)
             np.save(PATH+'x_test_norm_shape.npy', x_test.shape)
             x_train_norm = np.memmap(PATH+'x_train_norm.npy',dtype=cfg['data_type'],mode='w+',shape=(x_train.shape))
@@ -406,7 +408,7 @@ class Dataset():
 
         return x_train_norm, y_train_norm, x_test_norm, y_test_norm, static, lat, lon, mask
 #------------------------------------------------------------------------------------------------------------------------------
-    #将nc后缀的数据转化为npy后缀的数据
+    #Convert nc data into npy data
     def _load_forcing_or_land_surface(self,
                       root,
                       _list,
@@ -457,6 +459,7 @@ class Dataset():
                 raise RuntimeError(f"Unknown variable type {variable}")
         return feature
 #------------------------------------------------------------------------------------------------------------------------------
+    #Reverse normalization, which is used in prediction
     def reverse_normalize(
             self,
             feature,
