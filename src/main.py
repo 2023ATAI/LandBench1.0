@@ -22,7 +22,6 @@ import torch
 # ------------------------------------------------------------------------------
 
 def main(cfg):
-    #判断是否有显卡，有显卡用显卡，没显卡用cpu
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     device_ids = [0,1]
     print('Now we training {d_p} product in {sr} spatial resolution'.format(d_p=cfg['product'],sr=str(cfg['spatial_resolution'])))
@@ -30,11 +29,10 @@ def main(cfg):
     # x_train: nt,nf,nlat,nlon; y_train:nt,nlat,nlon, static:nlat,nlon
     print('1 step:-----------------------------------------------------------------------------------------------------------------')
     print('[ATAI {d_p} work ] Make & load inputs'.format(d_p=cfg['workname']))
-    #创建数据存放的文件夹  spatial_resolution默认为1
     path = cfg['inputs_path']+cfg['product']+'/'+str(cfg['spatial_resolution'])+'/'
     if not os.path.isdir (path):
         os.makedirs(path)
-    #判断是否有训练数据文件x_train_norm.npy，有则使用 无则创建
+    #To determine whether the raw data in LandBench has been processed, it is necessary to convert it according to the requirements of the designed model.
     if os.path.exists(path+'/x_train_norm.npy'):
         print(' [ATAI {d_p} work ] loading input data'.format(d_p=cfg['workname']))
         x_train_shape = np.load(path+'x_train_norm_shape.npy',mmap_mode='r')
@@ -51,12 +49,10 @@ def main(cfg):
         #np.savetxt("/data/test/x_trainxxx.csv",x_train[:,90,:,2],delimiter=",")
 
     else:     
-        # 在data.py中重新处理并且加载数据
         print('[ATAI {d_p} work ] making input data'.format(d_p=cfg['workname']))
         cls = Dataset(cfg) #FIXME: saving to input path
         x_train, y_train, x_test, y_test, static, lat, lon,mask = cls.fit(cfg)
     # load scaler for inverse
-    # 保存归一化所使用的最大最小值
     if cfg['normalize_type'] in ['region']:                                      
         scaler_x = np.memmap(path+'scaler_x.npy',dtype=cfg['data_type'],mode='r+',shape=(2, x_train.shape[1], x_train.shape[2], x_train.shape[3]))
         scaler_y = np.memmap(path+'scaler_y.npy',dtype=cfg['data_type'],mode='r+',shape=(2, y_train.shape[1], y_train.shape[2], y_train.shape[3]))  
@@ -81,7 +77,7 @@ def main(cfg):
     #    print(i,'-th x has', np.isnan(x_).sum()/1000,'thousands NAN values')
     #print('label has', np.isnan(y_train).sum()/1000,'thousands NAN values')
 # ------------------------------------------------------------------------------------------------------------------------------
-    #加载训练好的模型，如果没有则在train.py中进行训练
+    #Model training
     out_path = cfg['inputs_path']+cfg['product']+'/'+str(cfg['spatial_resolution'])+'/' + cfg['workname'] + '/' + cfg['modelname'] +'/focast_time '+ str(cfg['forcast_time']) +'/'
     if not os.path.isdir (out_path):
         os.makedirs(out_path)   
@@ -93,7 +89,6 @@ def main(cfg):
         print('[ATAI {d_p} work ] training {m_n} model'.format(d_p=cfg['workname'],m_n=cfg['modelname'])) 
         for j in range(cfg["num_repeat"]):
             train(x_train, y_train, static, mask, scaler_x, scaler_y, cfg, j,path,out_path,device,device_ids)
-	    #加载训练好的模型
             model = torch.load(out_path+cfg['modelname']+'_para.pkl')
         print('[ATAI {d_p} work ] finish training {m_n} model'.format(d_p=cfg['workname'],m_n=cfg['modelname']))   
     # ------------------------------------------------------------------------------------------------------------------------------
@@ -105,10 +100,10 @@ def main(cfg):
     print('static shape :',static.shape)    
     print('scaler_x shape is',scaler_x.shape)
     print('scaler_y shape is',scaler_y.shape)
-    #对加载的模型在eval.py中进行测试
+    #Model testing
     y_pred, y_test = test(x_test, y_test, static, scaler_y, cfg, model,device) 
 # ------------------------------------------------------------------------------------------------------------------------------   
-# 将测试集跑出来的结果保存
+# save predicted values and true values
     print('[ATAI {d_p} work ] Saving predictions by {m_n} Model and we hope to use "postprocess" and "evaluate" codes for detailed analyzing'.format(d_p=cfg['workname'],m_n=cfg['modelname']))
     np.save(out_path +'_predictions.npy', y_pred)
     np.save(out_path + 'observations.npy', y_test)
