@@ -35,7 +35,7 @@ def train(x,
         print('\033[1;31m%s\033[0m' % "Applied Model is {m_n}, we need to transform the data according to the sphere shape".format(m_n=cfg['modelname']))
     if valid_split:
         nt,nf,nlat,nlon = x.shape  #x shape :nt,nf,nlat,nlon
-	#划分验证集和训练集
+	#Partition validation set and training set
         N = int(nt*cfg['split_ratio'])
         x_valid, y_valid, static_valid = x[N:], y[N:], static
         x, y = x[:N], y[:N]       
@@ -48,7 +48,7 @@ def train(x,
     print('mask shape is', mask.shape)
 
     # mask see regions
-    # 确定陆地边界
+    #Determine the land boundary
     if cfg['modelname'] in ['LSTM']:
         x, y, static = sea_mask_rnn(cfg, x, y, static, mask)
     elif cfg['modelname'] in ['CNN','ConvLSTM']:
@@ -59,7 +59,7 @@ def train(x,
     #       early stopping and save best model.
     for num_ in range(cfg['num_repeat']):
         # prepare models
-	#选择模型
+	#Selection model
         if cfg['modelname'] in ['LSTM']:
             lstmmodel_cfg = {}
             lstmmodel_cfg['input_size'] = cfg["input_size"]
@@ -77,7 +77,6 @@ def train(x,
     # NOTE: Only use `Adam`, we didn't apply adaptively
     #       learing rate schedule. We found `Adam` perform
     #       much better than `Adagrad`, `Adadelta`.
-	#算法选择Adam
         optim = torch.optim.Adam(model.parameters(),lr=cfg['learning_rate'])
 
         with trange(1, cfg['epochs']+1) as pbar:
@@ -150,8 +149,8 @@ def train(x,
                 #    break
 
                 # validate
-		#使用验证集对已经训练的模型进行测试
-		#每20轮训练用验证集进行一次验证，如果得到的误差比最小误差小 那么就对模型进行保存
+		#Use validation sets to test trained models
+		#If the error is smaller than the minimum error, then save the model.
                 if valid_split:
                     del x_batch, y_batch, aux_batch
                     MSE_valid_loss = 0
