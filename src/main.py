@@ -17,7 +17,7 @@ from config import get_args
 import torch
 # ------------------------------------------------------------------------------ 
 # Original author : Qingliang Li, Cheng Zhang, 12/23/2022
-# Edited by Jinlong Zhuu, Gan Li	
+# Edited by Jinlong Zhu, Gan Li	
 # Inspired by Lu Li
 # ------------------------------------------------------------------------------
 
