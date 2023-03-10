@@ -121,6 +121,5 @@ Run the following command in the directory of `LandBench1.0/src/` to get detaile
 
 ```
 python postprocess.py 
-python eval.py 
+python plot_test.py 
 ```
-
