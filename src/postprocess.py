@@ -21,13 +21,9 @@ def postprocess(cfg):
         out_path_convlstm = cfg['inputs_path']+cfg['product']+'/'+str(cfg['spatial_resolution'])+'/' + cfg['workname'] + '/' + cfg['modelname'] +'/focast_time '+ str(cfg['forcast_time']) +'/'
         y_pred_convlstm = np.load(out_path_convlstm+'_predictions.npy')
         y_test_convlstm = np.load(out_path_convlstm+'observations.npy')
-        #y_pred_convlstm = y_pred_convlstm[cfg["seq_len"]:]
-        #y_test_convlstm = y_test_convlstm[cfg["seq_len"]:]
         print(y_pred_convlstm.shape, y_test_convlstm.shape)
         # get shape
         nt, nlat, nlon = y_test_convlstm.shape    
-        # mask
-        #mask=y_test_lstm==y_test_convlstm
         # cal perf
         r2_convlstm = np.full(( nlat, nlon), np.nan)
         urmse_convlstm = np.full(( nlat, nlon), np.nan)
@@ -58,8 +54,6 @@ def postprocess(cfg):
         print(y_pred_lstm.shape, y_test_lstm.shape)
         # get shape
         nt, nlat, nlon = y_test_lstm.shape 
-        # mask
-        #mask=y_test_lstm==y_test_lstm
         # cal perf
         r2_lstm = np.full(( nlat, nlon), np.nan)
         urmse_lstm = np.full(( nlat, nlon), np.nan)
@@ -93,8 +87,6 @@ def postprocess(cfg):
         print(y_pred_cnn.shape, y_test_cnn.shape)
         # get shape
         nt, nlat, nlon = y_test_cnn.shape 
-        # mask
-        #mask=y_test_cnn==y_test_cnn
         # cal perf
         r2_cnn = np.full(( nlat, nlon), np.nan)    
         urmse_cnn = np.full(( nlat, nlon), np.nan)
@@ -137,8 +129,6 @@ def postprocess(cfg):
         print(y_pred_cnn.shape, y_test_cnn.shape)
         # get shape
         nt, nlat, nlon = y_test_cnn.shape 
-        # mask
-        #mask=y_test_cnn==y_test_cnn
         # cal perf
         r2_cnn = np.full(( nlat, nlon), np.nan)    
         urmse_cnn = np.full(( nlat, nlon), np.nan)
@@ -175,8 +165,6 @@ def postprocess(cfg):
         print(y_pred_cnn.shape, y_test_cnn.shape)
         # get shape
         nt, nlat, nlon = y_test_cnn.shape 
-        # mask
-        #mask=y_test_cnn==y_test_cnn
         # cal perf
         r2_cnn = np.full(( nlat, nlon), np.nan)    
         urmse_cnn = np.full(( nlat, nlon), np.nan)
@@ -221,8 +209,6 @@ def postprocess(cfg):
         print(y_pred_cnn.shape, y_test_cnn.shape)
         # get shape
         nt, nlat, nlon = y_test_cnn.shape 
-        # mask
-        #mask=y_test_cnn==y_test_cnn
         # cal perf
         r2_cnn = np.full(( nlat, nlon), np.nan)    
         urmse_cnn = np.full(( nlat, nlon), np.nan)
@@ -277,7 +263,6 @@ def postprocess(cfg):
             year_data = data[year*365:(year+1)*365]
             weekly_climat_per_year = year_data[:-1,:,:].reshape((52,7,year_data.shape[1],year_data.shape[2]))
             weekly_climat[year] = np.nanmean(weekly_climat_per_year,axis=1)
-           # print('weekly_climat[year] is',weekly_climat[year])
         weekly_mean =np.nanmean(weekly_climat,axis=0)
         weekly_results_ = np.repeat(weekly_mean,7,axis=0)   
         weekly_results = np.concatenate((weekly_results_,np.expand_dims(weekly_results_[-1,:,:],axis=0)),axis=0)
@@ -286,8 +271,6 @@ def postprocess(cfg):
         print(weekly_results.shape, y_test_cnn.shape)
         # get shape
         nt, nlat, nlon = y_test_cnn.shape 
-        # mask
-        #mask=y_test_cnn==y_test_cnn
         # cal perf
         r2_cnn = np.full(( nlat, nlon), np.nan)    
         urmse_cnn = np.full(( nlat, nlon), np.nan)
