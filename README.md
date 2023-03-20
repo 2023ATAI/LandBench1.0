@@ -121,5 +121,11 @@ Run the following command in the directory of `LandBench1.0/src/` to get detaile
 
 ```
 python postprocess.py 
-python plot_test.py 
+python post_test.py 
 ```
+
+### Note
+
+When the modelname in `config.py` is `Process, Persistence, and w_climatology`, there is no need to run main.py to process data and training models.Just execute commands(`
+python postprocess.py`and `python post_test.py`) for detailed analysis.
+
