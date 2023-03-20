@@ -25,8 +25,6 @@ def main(cfg):
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     device_ids = [0,1]
     print('Now we training {d_p} product in {sr} spatial resolution'.format(d_p=cfg['product'],sr=str(cfg['spatial_resolution'])))
-    # ------------------------------------------------------------------------------------------------------------------------------
-    # x_train: nt,nf,nlat,nlon; y_train:nt,nlat,nlon, static:nlat,nlon
     print('1 step:-----------------------------------------------------------------------------------------------------------------')
     print('[ATAI {d_p} work ] Make & load inputs'.format(d_p=cfg['workname']))
     path = cfg['inputs_path']+cfg['product']+'/'+str(cfg['spatial_resolution'])+'/'
@@ -46,7 +44,6 @@ def main(cfg):
         mask = np.load(path+file_name_mask)
         print('x_train[:,:,68,1] is',x_train[:,:,68,1])
         print('x_test[:,:,68,1] is',x_test[:,:,68,1])
-        #np.savetxt("/data/test/x_trainxxx.csv",x_train[:,90,:,2],delimiter=",")
 
     else:     
         print('[ATAI {d_p} work ] making input data'.format(d_p=cfg['workname']))
@@ -63,19 +60,6 @@ def main(cfg):
     print('2 step:-----------------------------------------------------------------------------------------------------------------')
     print('[ATAI {d_p} work ] Train & load {m_n} Model'.format(d_p=cfg['workname'],m_n=cfg['modelname']))
     print('[ATAI {d_p} work ] Wandb info'.format(d_p=cfg['workname']))
-    #default = dict(  
-    # model
-    #model_name=cfg['modelname'],
-    #hidden_size=cfg['hidden_size'],
-    ## train
-    #batch_size=cfg['batch_size'],
-    #epochs=cfg['epochs'])
-    #wandb.init(cfg['modelname'], config=default, allow_val_change=True)
-# ------------------------------------------------------------------------------------------------------------------------------
-    #for i in range (x_train_shape[3]):
-    #    x_ = x_train[:,:,:,i]
-    #    print(i,'-th x has', np.isnan(x_).sum()/1000,'thousands NAN values')
-    #print('label has', np.isnan(y_train).sum()/1000,'thousands NAN values')
 # ------------------------------------------------------------------------------------------------------------------------------
     #Model training
     out_path = cfg['inputs_path']+cfg['product']+'/'+str(cfg['spatial_resolution'])+'/' + cfg['workname'] + '/' + cfg['modelname'] +'/focast_time '+ str(cfg['forcast_time']) +'/'
