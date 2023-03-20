@@ -37,10 +37,6 @@ class Dataset():
         self.normalize = cfg['normalize']
         self.label = cfg['label']
         self.seq_len = cfg['seq_len']
-        # forcing name for ERA5-Land.
-        # NOTE: The name of data should be "ERA5Land_1988_12_daily_VN.nc"
-        #       VN: The variable name in netcdf file.
-        #       1988:year;  12:month
         self.forcing_list = cfg['forcing_list']
         self.static_list = cfg['static_list']
         self.land_surface_list = cfg['land_surface_list']
@@ -99,9 +95,7 @@ class Dataset():
                 lat = latitude
             data = np.load(PATH+file_name_forcing,mmap_mode='r')
             forcing_list.append(data)
-            #print(str(year)+':'+str(data.shape))
             day_list.append(data.shape[0])
-        #print(np.sum(day_list,axis=0))#
         lat_file_name = 'lat_{s}.npy'.format(
             s=self.s_resolution)
         lon_file_name = 'lon_{s}.npy'.format(
@@ -129,17 +123,10 @@ class Dataset():
                     start = end
                     end = start+day_list[i]
                 forcing[start:end] = forcing_list[i]
-                #print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
-            #print("forcing-------------")
-           # print(forcing[10000,:,100,:])
             forcing.flush()
             del forcing
         forcing = np.memmap(PATH+'forcing_memmap.npy',dtype=cfg['data_type'],mode='r',shape=(np.sum(day_list,axis=0),forcing_list[0].shape[1],forcing_list[0].shape[2],forcing_list[0].shape[3]))
-        #print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
-        #print("forcing-------------")
-        #print(forcing[10000,:,100,:])
-        #print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
-        #forcing = np.concatenate(forcing, axis=0)
+	
 
         if os.path.exists(PATH+file_name_forcing+'/'+lat_file_name):
             lat, lon = np.load(PATH+lat_file_name), np.load(PATH+lon_file_name)
@@ -160,16 +147,13 @@ class Dataset():
                                              file_name_land_surface,
                                              category='land_surface')
             data = np.load(PATH+file_name_land_surface,mmap_mode='r')
-            land_surface_list.append(data)
-            #print(str(year)+':'+str(data.shape))
-	##Determine whether to perform memmap mapping   
+            land_surface_list.append(data) 
         if cfg['memmap']:
             
             land_surface=np.memmap(PATH+'land_surface_memmap.npy',dtype=cfg['data_type'],
 		mode='w+',shape=(np.sum(day_list,axis=0),land_surface_list[0].shape[1],
 		land_surface_list[0].shape[2],land_surface_list[0].shape[3]))
             
-            #print(day_list)
             for i in range(len(land_surface_list)):
                 if i ==0:
                     start=0
@@ -178,15 +162,11 @@ class Dataset():
                     start = end
                     end = start+day_list[i]
                 land_surface[start:end] = land_surface_list[i]
-            #print("land_surface-------------")
-            #print(land_surface[-1,:,100,:])
             land_surface.flush()
             del land_surface
-               # print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
 
         land_surface = np.memmap(PATH+'land_surface_memmap.npy',dtype=cfg['data_type'],mode='r',shape=(np.sum(day_list,axis=0),land_surface_list[0].shape[1],land_surface_list[0].shape[2],land_surface_list[0].shape[3]))
-        #print("land_surface-------------")
-        #print(land_surface[-1,:,100,:])
+	
 # ------------------------------------------------------------------------------------------------------------------------------
         print('[ATAI {d_p} work ] loading label'.format(d_p=cfg['workname']))
 	#Load label data 
@@ -211,13 +191,7 @@ class Dataset():
         file_name_mask = 'Mask with {sr} spatial resolution.npy'.format(sr=self.s_resolution)
         mask = np.ones(label[0,:,:,0].shape)
         mask[np.isnan(label[0,:,:,0])] = 0
-        #mask[-int(mask.shape[0]/5.4):,:]=0
-        #min_map = np.min(label[:,:,:,0],axis=0)
-        #max_map = np.max(label[:,:,:,0],axis=0)
-        #mask[min_map==max_map] = 0
         print("mask shape is ",mask.shape)
-        #plt.imshow(mask)       
-        #plt.show
         np.save(PATH+file_name_mask, np.squeeze(mask))
         mask = np.load(PATH+file_name_mask)
 # ------------------------------------------------------------------------------------------------------------------------------
@@ -228,17 +202,10 @@ class Dataset():
             static = []
             for i in range(len(self.static_list)):
                 file_static = data_path + 'constants' + '/' + self.static_list[i] + '.nc'
-                #print(file_)
                 with xr.open_dataset(file_static) as f_:
                     static_data = f_[self.s_namedict[self.static_list[i]]]
                     static_data = self._lon_transform(static_data)
                     static_data = self._interp(static_data,mask)     
-                    ##plt.figure()
-                    #plt.imshow(land_surface[0,:,:,0])
-                    #plt.show()          
-                    #plt.figure()
-                    #plt.imshow(static_data)
-                    #plt.show()
                 static.append(static_data)
             static = np.stack(static, axis=-1)
             print("static shape is ",static.shape)
@@ -404,7 +371,6 @@ class Dataset():
             np.savetxt("/data/test/x_train_norm_read.csv",x_train_norm[:,:,45,4],delimiter=",")
             x_test_norm = np.memmap(PATH+'x_test_norm.npy',dtype=cfg['data_type'],mode='r+',shape=(x_test.shape))
 
-        #np.save(PATH + 'static.npy', static)
 
         return x_train_norm, y_train_norm, x_test_norm, y_test_norm, static, lat, lon, mask
 #------------------------------------------------------------------------------------------------------------------------------
@@ -423,22 +389,17 @@ class Dataset():
         tmp = []
         for i in range(len(_list)):
             file_ = root + category + '/' + str(year) + '/' + _list[i] + '.nc'
-            #print(file_)
             with xr.open_dataset(file_) as f:
                     tmp.append(f[s_namedict[_list[i]]])
                     lat, lon = np.array(f.latitude), np.array(f.longitude)
         tmp = np.stack(tmp, axis=-1)
         np.save(PATH + file_name, tmp)
         print('ATAI {d_p} work ] finish loading {v_n} in {y} year '.format(d_p=cfg['workname'],v_n=_list, y=year))
-        #loaddata = np.concatenate(loaddata, axis=0)
 
 
         return lat, lon
 #------------------------------------------------------------------------------------------------------------------------------
     def _normalize(self, feature, variable, scaler, scaler_type):
-        #scaler = np.expand_dims(scaler,axis=1)
-        #print(scaler.shape)(2,1,360,9)
-        #print(np.array(scaler[0]).shape)
         if scaler_type == 'standard':
             if variable == 'input':
                 feature = (
@@ -492,7 +453,6 @@ class Dataset():
         return feature
 #------------------------------------------------------------------------------------------------------------------------------
     def _get_minmax_scaler(self, X, y, scaler_x, scaler_y,type: str) -> dict:               
-        #scaler = {}
         if type == 'global':
             scaler_x[0] = np.squeeze(np.nanmin(
                 X, axis=(0, 1, 2), keepdims=True).tolist())
@@ -508,16 +468,6 @@ class Dataset():
                 y, axis=(0), keepdims=True)
             scaler_y[1] = np.nanmax(
                 y, axis=(0), keepdims=True)
-# scaler[0,] is input_mean; scaler[1,] is input_std; scaler[2,] is output_mean; scaler[3,] is output_std
-            #scaler['input_mean'] = np.nanmin(
-            #    X, axis=(0), keepdims=True).tolist()
-            #print('scale shape is',scaler['input_mean'].shape)
-            #scaler['input_std'] = np.nanmax(
-            #    X, axis=(0), keepdims=True).tolist()
-            #scaler['output_mean'] = np.nanmin(
-            #    y, axis=(0), keepdims=True).tolist()
-            #scaler['output_std'] = np.nanmax(
-            #    y, axis=(0), keepdims=True).tolist()
         else:
             raise IOError(f"Unknown variable type {type}")
         return scaler_x, scaler_y
