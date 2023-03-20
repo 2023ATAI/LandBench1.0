@@ -62,13 +62,6 @@ def load_train_data_for_rnn(cfg, x, y, aux, scaler):
     aux = aux[mask]
     x[np.isinf(x)]=np.nan
     x = np.nan_to_num(x)
-    #aux = np.nan_to_num(aux)
-   # for i in range (x.shape[1]):
-    #    x_ = x[:,i,:]
-   #     print(i,'-th x has', np.isnan(x_).sum()/1000,'thousands NAN values')
-   # print('label has', np.isnan(y).sum()/1000,'thousands NAN values')
-
-
     return x, y, aux, mean, std
 
 
@@ -76,7 +69,6 @@ def load_test_data_for_rnn(cfg, x, y, aux, scaler, stride,i, n):
     x = x.transpose(0,3,1,2)
     y = y.transpose(0,3,1,2)
     aux = aux.transpose(2,0,1)
-    #scaler = scaler.transpose(0,3,1,2)
     x = x.reshape(x.shape[0],x.shape[1],x.shape[2]*x.shape[3])
     nt, nf, ngrid = x.shape
     y = y.reshape(y.shape[0],y.shape[2]*y.shape[3])
@@ -89,7 +81,6 @@ def load_test_data_for_rnn(cfg, x, y, aux, scaler, stride,i, n):
     x_temp = x[i*stride:i*stride+cfg["seq_len"],:,:][:,:,0:ngrid:2*stride]
     x_new = np.transpose(x_temp, (2,0,1))
     y_new = y[i*stride+cfg["seq_len"]+cfg["forcast_time"],0:ngrid:2*stride]
-        #y_new = np.transpose(y_new, (1,0))
     aux_new = aux[:,0:ngrid:2*stride]
     aux_new = np.transpose(aux_new, (1,0))
 
@@ -119,7 +110,6 @@ def load_train_data_for_cnn(cfg, x, y, aux, scaler,lat_index,lon_index, mask):
         lon_index_bias = idx_lon[i] + cfg['spatial_offset']
         x_new[i] = x[idx_time:idx_time+cfg['seq_len'],:,lat_index[lat_index_bias-cfg['spatial_offset']:lat_index_bias+cfg['spatial_offset']+1],:][:,:,:,lon_index[lon_index_bias-cfg['spatial_offset']:lon_index_bias+cfg['spatial_offset']+1]]
         y_new[i] = y[idx_time+cfg['seq_len']+cfg["forcast_time"],:,idx_lat[i], idx_lon[i]] ##
-        #y_new[i] = y[idx_time+cfg['seq_len']+cfg["forcast_time"],:,lat_index[idx_lat[i]], lon_index[idx_lon[i]]] ##
         aux_new[i] = aux[:,lat_index[lat_index_bias-cfg['spatial_offset']:lat_index_bias+cfg['spatial_offset']+1],:][:,:,lon_index[lon_index_bias-cfg['spatial_offset']:lon_index_bias+cfg['spatial_offset']+1]]
 
     y_new[np.isinf(y_new)]=np.nan
@@ -135,7 +125,6 @@ def load_test_data_for_cnn(cfg, x, y, aux, scaler, slect_list,lat_index,lon_inde
     x = x.transpose(0,3,1,2)
     y = y.transpose(0,3,1,2)
     aux = aux.transpose(2,0,1)
-    #scaler = scaler.transpose(0,3,1,2)
     nt, _, nlat, nlon = y.shape
     ny = (2*nlat//stride)+1
     nx = (2*nlon//stride)+1
@@ -210,31 +199,3 @@ def erath_data_transform(cfg, x):
     lon_index_new = np.concatenate((x_left,lon_index),axis=0)
     lon_index_new = np.concatenate((lon_index_new,x_right),axis=0)
     return lat_index_new,lon_index_new
-# Kratzert et al.(2019), HESS
-#class DataGenerator(tf.keras.utils.Sequence):
-#    """Data generator based on Shen et al."""
-#    def __init__(self, x, y, cfg, shuffle=True):
-#        super().__init__()
-#        self.x, self.y = x, y  # (ngrid, nt, nfeat)-(ngrid, nt, nout)
-#        self.shuffle = shuffle
-#        self.batch_size = cfg["batch_size"]
-#        self.seq_len = cfg["seq_len"]
-#        self.ngrids = x.shape[0]
-#        self.nt = x.shape[1]
-#        self.indexes = np.arange(self.ngrids)
-        
-#    def __len__(self):
-#        return math.ceil(self.ngrids / self.batch_size)
-
-#    def __getitem__(self, idx):
-#        # index for grids
-#        grid_idx = self.indexes[idx * self.batch_size:(idx+1)*self.batch_size]
-#        # index for timestep
-#        x_ = self.x[grid_idx]
-#        y_ = self.y[grid_idx]
-#        return x_, y_
-
-#    def on_epoch_end(self):
-#        self.indexes = np.arange(self.ngrids)
-#        if self.shuffle:
-#            np.random.shuffle(self.indexes)
