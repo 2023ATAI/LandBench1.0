@@ -113,11 +113,8 @@ def train(x,
                         x_batch = torch.from_numpy(x_batch).to(device)
                         aux_batch = torch.from_numpy(aux_batch).to(device)
                         y_batch = torch.from_numpy(y_batch).to(device)
-                        # x_batch = torch.cat([x_batch, aux_batch], 2)
                         x_batch = x_batch.squeeze(dim=1)
                         x_batch = x_batch.reshape(x_batch.shape[0],x_batch.shape[1]*x_batch.shape[2],x_batch.shape[3],x_batch.shape[4])
-                        #print('x_batch shape is',x_batch.shape)
-                        #print('aux_batch shape is',aux_batch.shape)
                         x_batch = torch.cat([x_batch, aux_batch], 1)
                         pred = model(x_batch, aux_batch)
                     elif cfg['modelname'] in ['ConvLSTM']:
@@ -143,11 +140,6 @@ def train(x,
                 # get loss log
                 loss_str = "Epoch {} Train MSE Loss {:.3f} time {:.2f}".format(epoch, MSELoss / cfg["niter"], t_end - t_begin)
                 print(loss_str)
-                # refresh train if loss equal to NaN. Will build fresh model and 
-                # re-train it until it didn't have NaN loss.
-                #if np.isnan(MSELoss):
-                #    break
-
                 # validate
 		#Use validation sets to test trained models
 		#If the error is smaller than the minimum error, then save the model.
@@ -218,15 +210,7 @@ def train(x,
                                 mse_valid_loss = NaNMSELoss.fit(cfg, pred_valid, y_valid_batch,lossmse)
                                 MSE_valid_loss += loss.item()
 # ------------------------------------------------------------------------------------------------------------------------------
-                                      
-#                        with torch.no_grad():
-#                            if cfg["modelname"] in ['ConvLSTM']:
-#                               pred_valid = model(x_valid_temp, static_valid_temp,cfg)
-#                            else:
-#                                pred_valid = model(x_valid_temp, static_valid_temp)
-                            # cal mse loss
-#                        mse_valid_loss = NaNMSELoss.fit(cfg, pred_valid, y_valid_temp,lossmse)
-# ------------------------------------------------------------------------------------------------------------------------------                        
+             
 
                         t_end = time.time()
                         mse_valid_loss = MSE_valid_loss/(len(gt_list))
