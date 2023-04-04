@@ -168,7 +168,7 @@ def train(x,
                                 with torch.no_grad():
                                     pred_valid = model(x_valid_batch, aux_valid_batch)
                                 mse_valid_loss = NaNMSELoss.fit(cfg, pred_valid.squeeze(1), y_valid_batch,lossmse)
-                                MSE_valid_loss += loss.item()
+                                MSE_valid_loss += mse_valid_loss.item()
 #  validate way for CNN model
                         elif cfg['modelname'] in ['CNN']:
                             gt_list = [i for i in range(0,x_valid.shape[0]-cfg['seq_len']-cfg['forcast_time'],cfg["stride"])]
@@ -188,7 +188,7 @@ def train(x,
                                 with torch.no_grad():
                                     pred_valid = model(x_valid_batch, aux_valid_batch)
                                 mse_valid_loss = NaNMSELoss.fit(cfg, pred_valid, y_valid_batch,lossmse)
-                                MSE_valid_loss += loss.item()
+                                MSE_valid_loss += mse_valid_loss.item()
 #  validate way for ConvLSTM model，same as CNN model
                         elif cfg['modelname'] in ['ConvLSTM']:
                             gt_list = [i for i in range(0,x_valid.shape[0]-cfg['seq_len']-cfg['forcast_time'],cfg["stride"])]
@@ -208,7 +208,7 @@ def train(x,
                                 with torch.no_grad():
                                     pred_valid = model(x_valid_batch, aux_valid_batch,cfg)
                                 mse_valid_loss = NaNMSELoss.fit(cfg, pred_valid, y_valid_batch,lossmse)
-                                MSE_valid_loss += loss.item()
+                                MSE_valid_loss += mse_valid_loss.item()
 # ------------------------------------------------------------------------------------------------------------------------------
              
 
