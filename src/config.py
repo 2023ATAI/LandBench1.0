@@ -43,12 +43,12 @@ def get_args() -> dict:
     parser.add_argument('--hidden_size', type=float, default=128)
     parser.add_argument('--batch_size', type=float, default=64)
     parser.add_argument('--patience', type=int, default=10) 
-    parser.add_argument('--seq_len', type=float, default=7) #CNN:1; ;LSTM:365 or 7;   
+    parser.add_argument('--seq_len', type=float, default=7) #365 or 7;   
     parser.add_argument('--epochs', type=float, default=1000)#500
     parser.add_argument('--niter', type=float, default=300) #200
     parser.add_argument('--num_repeat', type=float, default=3)
     parser.add_argument('--dropout_rate', type=float, default=0.15)
-    parser.add_argument('--input_size_cnn', type=float, default=57) #CNN (seq_len+1)*input_size
+    parser.add_argument('--input_size_cnn', type=float, default=57) #CNN (seq_len)*(num of forcing_list+num of land_surface_list)+1
     parser.add_argument('--kernel_size', type=float, default=3) #CNN
     parser.add_argument('--stride_cnn', type=float, default=2) #CNN
     cfg = vars(parser.parse_args())
