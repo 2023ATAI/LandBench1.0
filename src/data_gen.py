@@ -66,6 +66,29 @@ def load_train_data_for_rnn(cfg, x, y, aux, scaler):
 
 
 def load_test_data_for_rnn(cfg, x, y, aux, scaler, stride,i, n):
+
+    nt, nf, ngrid = x.shape
+    x = np.transpose(x, (2,0,1))
+    y = np.transpose(y, (1,0))
+    aux = np.transpose(aux, (1,0))
+
+    mean, std = np.array(scaler[0]), np.array(scaler[1])
+    x_new = x[:,i*stride:i*stride+cfg["seq_len"],:][0:ngrid:2*stride,:,:]
+    y_new = y[0:ngrid:2*stride,i*stride+cfg["seq_len"]+cfg["forcast_time"]]
+
+    aux_new = aux[0:ngrid:2*stride,:]
+
+    y_new[np.isinf(y_new)] = np.nan
+    mask = y_new == y_new
+    x_new = x_new[mask]
+    y_new = y_new[mask]
+    aux_new = aux_new[mask]
+    x_new[np.isinf(x_new)] = np.nan
+    x_new = np.nan_to_num(x_new)
+    return x_new, y_new, aux_new, np.tile(mean, (1, n, 1)), np.tile(std, (1,n,1))
+
+'''
+def load_test_data_for_rnn(cfg, x, y, aux, scaler, stride,i, n):
     x = x.transpose(0,3,1,2)
     y = y.transpose(0,3,1,2)
     aux = aux.transpose(2,0,1)
@@ -85,7 +108,7 @@ def load_test_data_for_rnn(cfg, x, y, aux, scaler, stride,i, n):
     aux_new = np.transpose(aux_new, (1,0))
 
     return x_new, y_new, aux_new, np.tile(mean, (1, n, 1)), np.tile(std, (1,n,1))
-
+'''
 # ------------------------------------------------------------------------------------------------------------------------------              
 def load_train_data_for_cnn(cfg, x, y, aux, scaler,lat_index,lon_index, mask):
     nt, nf, nlat, nlon = x.shape
@@ -143,7 +166,7 @@ def load_test_data_for_cnn(cfg, x, y, aux, scaler, slect_list,lat_index,lon_inde
                 y_new[count] = y[z+cfg['seq_len']+cfg["forcast_time"],:,j, i] ##
                 aux_new[count] = aux[:,lat_index[lat_index_bias-cfg['spatial_offset']:lat_index_bias+cfg['spatial_offset']+1],:][:,:,lon_index[lon_index_bias-cfg['spatial_offset']:lon_index_bias+cfg['spatial_offset']+1]]
                 count =count+1
-
+    y_new[np.isinf(y_new)]=np.nan
     mask = y_new == y_new
     x_new = x_new[mask]
     y_new = y_new[mask]
