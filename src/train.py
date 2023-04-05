@@ -51,6 +51,7 @@ def train(x,
     #Determine the land boundary
     if cfg['modelname'] in ['LSTM']:
         x, y, static = sea_mask_rnn(cfg, x, y, static, mask)
+	x_valid, y_valid, static_valid = sea_mask_rnn(cfg, x_valid, y_valid, static_valid, mask)
     elif cfg['modelname'] in ['CNN','ConvLSTM']:
         x, y, static, mask_index = sea_mask_cnn(cfg, x, y, static, mask)
 
