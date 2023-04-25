@@ -18,17 +18,17 @@ def train(x,
           num_repeat,
           PATH,
           out_path,
-          device, 
-          device_ids,
+          device,
           num_task=None,
           valid_split=True):
    
     patience = cfg['patience']
     wait = 0
     best = 9999
-    
+    valid_split=cfg['valid_split']
     print('the device is {d}'.format(d=device))
-    
+    print('y type is {d_p}'.format(d_p=y.dtype))
+    print('static type is {d_p}'.format(d_p=static.dtype))
     if cfg['modelname'] in ['CNN', 'ConvLSTM']:
 #	Splice x according to the sphere shape
         lat_index,lon_index = erath_data_transform(cfg, x)
@@ -50,8 +50,9 @@ def train(x,
     # mask see regions
     #Determine the land boundary
     if cfg['modelname'] in ['LSTM']:
+        if valid_split:
+            x_valid, y_valid, static_valid = sea_mask_rnn(cfg, x_valid, y_valid, static_valid, mask)
         x, y, static = sea_mask_rnn(cfg, x, y, static, mask)
-	x_valid, y_valid, static_valid = sea_mask_rnn(cfg, x_valid, y_valid, static_valid, mask)
     elif cfg['modelname'] in ['CNN','ConvLSTM']:
         x, y, static, mask_index = sea_mask_cnn(cfg, x, y, static, mask)
 
@@ -67,7 +68,7 @@ def train(x,
             lstmmodel_cfg['hidden_size'] = cfg["hidden_size"]*1
             lstmmodel_cfg['out_size'] = 1
             model = LSTMModel(cfg,lstmmodel_cfg).to(device)
-            # model = torch.nn.DataParallel(model, device_ids=device_ids)
+            
         elif cfg['modelname'] in ['CNN']:
             model = CNN(cfg).to(device)
         elif cfg['modelname'] in ['ConvLSTM']:

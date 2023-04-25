@@ -61,8 +61,7 @@ class ConvLSTMModel(nn.Module):
                        input_dim=int(cfg["input_size"]),
                        hidden_dim=[int(cfg["hidden_size"]), int(cfg["hidden_size"]/2)],
                        kernel_size=(int(cfg["kernel_size"]), int(cfg["kernel_size"])),
-                       num_layers=2,batch_first=True
-                       )
+                       num_layers=2,cfg=cfg,batch_first=True)
         self.drop = nn.Dropout(p=cfg["dropout_rate"])
         self.dense = nn.Linear(int(cfg["hidden_size"]/2)*int(2*cfg["spatial_offset"]+1)*int(2*cfg["spatial_offset"]+1),1)
         #self.batchnorm = nn.BatchNorm1d(int(cfg["hidden_size"]/2))

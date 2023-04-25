@@ -66,15 +66,15 @@ def test(x, y, static, scaler, cfg, model,device):
     #mean, std = np.array(scaler[0]), np.array(scaler[1])
     #mean = torch.from_numpy(mean).to(device)
     #std = torch.from_numpy(std).to(device)  
-    if y.shape[0]-cfg["seq_len"]-cfg["forcast_time"]!=365:
-        seq_len = 7
-        x = x[5-1:]
-        y_pred_ens = np.zeros((y.shape[0]-seq_len-cfg['forcast_time']+1-5, y.shape[1], y.shape[2]))*np.nan
-        y_true = y[seq_len+cfg['forcast_time']+5-1:,:,:,0]
-    else:
+    #if y.shape[0]-cfg["seq_len"]-cfg["forcast_time"]!=365:
+    #    seq_len = 7
+    #    x = x[5-1:]
+    #    y_pred_ens = np.zeros((y.shape[0]-seq_len-cfg['forcast_time']+1-5, y.shape[1], y.shape[2]))*np.nan
+    #    y_true = y[seq_len+cfg['forcast_time']+5-1:,:,:,0]
+    #else:
 
-        y_pred_ens = np.zeros((y.shape[0]-cfg["seq_len"]-cfg['forcast_time'], y.shape[1], y.shape[2]))*np.nan
-        y_true = y[cfg["seq_len"]+cfg['forcast_time']:,:,:,0]
+    y_pred_ens = np.zeros((y.shape[0]-cfg["seq_len"]-cfg['forcast_time'], y.shape[1], y.shape[2]))*np.nan
+    y_true = y[cfg["seq_len"]+cfg['forcast_time']:,:,:,0]
     print('x shape is',x.shape)
     print('the true label shape is: {ts} and the predicton shape is: {ps}'.format(ts=y_true.shape, ps=y_pred_ens.shape))
     mask = y_true == y_true

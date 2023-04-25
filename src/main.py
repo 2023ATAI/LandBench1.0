@@ -22,8 +22,8 @@ import torch
 # ------------------------------------------------------------------------------
 
 def main(cfg):
-    device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-    device_ids = [0,1]
+    device = torch.device(cfg['device']) if torch.cuda.is_available() else torch.device('cpu')
+    
     print('Now we training {d_p} product in {sr} spatial resolution'.format(d_p=cfg['product'],sr=str(cfg['spatial_resolution'])))
     print('1 step:-----------------------------------------------------------------------------------------------------------------')
     print('[ATAI {d_p} work ] Make & load inputs'.format(d_p=cfg['workname']))
@@ -42,8 +42,7 @@ def main(cfg):
         static = np.load(path+'static_norm.npy')
         file_name_mask = 'Mask with {sr} spatial resolution.npy'.format(sr=cfg['spatial_resolution'])
         mask = np.load(path+file_name_mask)
-        print('x_train[:,:,68,1] is',x_train[:,:,68,1])
-        print('x_test[:,:,68,1] is',x_test[:,:,68,1])
+        
 
     else:     
         print('[ATAI {d_p} work ] making input data'.format(d_p=cfg['workname']))
@@ -72,7 +71,7 @@ def main(cfg):
         # train 
         print('[ATAI {d_p} work ] training {m_n} model'.format(d_p=cfg['workname'],m_n=cfg['modelname'])) 
         for j in range(cfg["num_repeat"]):
-            train(x_train, y_train, static, mask, scaler_x, scaler_y, cfg, j,path,out_path,device,device_ids)
+            train(x_train, y_train, static, mask, scaler_x, scaler_y, cfg, j,path,out_path,device)
             model = torch.load(out_path+cfg['modelname']+'_para.pkl')
         print('[ATAI {d_p} work ] finish training {m_n} model'.format(d_p=cfg['workname'],m_n=cfg['modelname']))   
     # ------------------------------------------------------------------------------------------------------------------------------
@@ -88,7 +87,7 @@ def main(cfg):
     y_pred, y_test = test(x_test, y_test, static, scaler_y, cfg, model,device) 
 # ------------------------------------------------------------------------------------------------------------------------------   
 # save predicted values and true values
-    print('[ATAI {d_p} work ] Saving predictions by {m_n} Model and we hope to use "postprocess" and "evaluate" codes for detailed analyzing'.format(d_p=cfg['workname'],m_n=cfg['modelname']))
+    print('[ATAI {d_p} work ] Saving predictions by {m_n} Model and we hope to use "postprocess" and "plot_test" codes for detailed analyzing'.format(d_p=cfg['workname'],m_n=cfg['modelname']))
     np.save(out_path +'_predictions.npy', y_pred)
     np.save(out_path + 'observations.npy', y_test)
 

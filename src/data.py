@@ -103,8 +103,7 @@ class Dataset():
         if not os.path.exists(PATH+lat_file_name):
             np.save(PATH+lat_file_name, lat)
             np.save(PATH+lon_file_name, lon)
-            print('lon is',lon)
-            print('lat is',lat)
+            
         else:
             lat = np.load(PATH+lat_file_name)
             lon = np.load(PATH+lon_file_name)      
@@ -187,7 +186,11 @@ class Dataset():
             data = np.load(PATH + file_name_label, mmap_mode='r')  # (t,lat,lon,feat)
             label.append(data)
         label = np.concatenate(label, axis=0)
+        print('label type is {d_p}'.format(d_p=label.dtype))
+        if cfg['data_type']=='float32':
+            label = label.astype(np.float32)
             #filter Glacial region   
+        print('label type is {d_p}'.format(d_p=label.dtype))
         file_name_mask = 'Mask with {sr} spatial resolution.npy'.format(sr=self.s_resolution)
         mask = np.ones(label[0,:,:,0].shape)
         mask[np.isnan(label[0,:,:,0])] = 0
@@ -209,9 +212,10 @@ class Dataset():
                 static.append(static_data)
             static = np.stack(static, axis=-1)
             print("static shape is ",static.shape)
-            print("static[32,:,0] is ",static[32,:,0])
+            if cfg['data_type']=='float32':
+                static = static.astype(np.float32)
             static = self._spatial_normalize(static)
-            print("static[32,:,0] after normalization is ",static[32,:,0])
+            print('static type is {d_p}'.format(d_p=static.dtype))
             np.save(PATH+'static_norm.npy', static)
         else:
             static = np.load(PATH+'static_norm.npy')
@@ -284,8 +288,7 @@ class Dataset():
                     scaler_x = np.memmap(PATH+'scaler_x.npy',dtype=cfg['data_type'],mode='r+',shape=(2, x_train.shape[1], x_train.shape[2], x_train.shape[3]))
                     scaler_y = np.memmap(PATH+'scaler_y.npy',dtype=cfg['data_type'],mode='r+',shape=(2, y_train.shape[1], y_train.shape[2], y_train.shape[3]))
                     print('processed: x_train shape is: {x_s}, y_train shape is: {y_s}, x_test shape is: {x_ts_s}'.format(x_s=x_train.shape,y_s=y_train.shape,x_ts_s=x_test.shape))
-                    print('x_train_before_norm',x_train[:,:,68,1])
-                    print('scaler_x',scaler_x[:,:,68,1])
+                    
                     for i in range (x_train.shape[1]):
                         print('[{d_p}-th ] finish'.format(d_p=i))
                         out_x_train = self._normalize(x_train[:,i,:,:], 'input', scaler_x[:,i,:,:], 'minmax')
@@ -294,7 +297,7 @@ class Dataset():
                         y_train[:,i,:,:] = out_y_train
                         out_x_test = self._normalize(x_test[:,i,:,:], 'input', scaler_x[:,i,:,:], 'minmax')
                         x_test[:,i,:,:] = out_x_test
-                    print('x_train_after_norm',x_train[:,:,68,1])
+                    
 		####gloabl
                 elif cfg['normalize_type'] in ['global']: 
                     scaler_x = np.memmap(PATH+'scaler_x.npy',dtype=cfg['data_type'],mode='w+',shape=(2, x_train.shape[3]))
@@ -313,8 +316,7 @@ class Dataset():
                     scaler_x = np.memmap(PATH+'scaler_x.npy',dtype=cfg['data_type'],mode='r+',shape=(2,x_train.shape[3]))
                     scaler_y = np.memmap(PATH+'scaler_y.npy',dtype=cfg['data_type'],mode='r+',shape=(2,y_train.shape[3]))
                     print('processed: x_train shape is: {x_s}, y_train shape is: {y_s}, x_test shape is: {x_ts_s}'.format(x_s=x_train.shape,y_s=y_train.shape,x_ts_s=x_test.shape))
-                    print('scaler_x',scaler_x)
-                    print('x_train_before_norm',x_train[:,:,68,1])
+                    
 
                     for i in range (y_train.shape[3]):
                         print('[{d_p}-th ] for x_test finish'.format(d_p=i))
@@ -342,7 +344,7 @@ class Dataset():
                         x_test[:,:,:,i] = out_x_test
 
 
-                    print('x_train_after_norm',x_train[:,:,68,1])
+                    
 # ------------------------------------------------------------------------------------------------------------------------------
 # save
 	    #Save the normalized dataset
@@ -351,8 +353,7 @@ class Dataset():
             x_train_norm = np.memmap(PATH+'x_train_norm.npy',dtype=cfg['data_type'],mode='w+',shape=(x_train.shape))
             x_train_norm[:] = x_train[:]
 
-            print('x_train_norm_before_flush',x_train_norm[:,:,68,1])
-            np.savetxt("/data/test/x_train_norm.csv",x_train_norm[:,:,45,4],delimiter=",")
+            
             x_train_norm.flush()
             del x_train_norm          
 
@@ -367,8 +368,7 @@ class Dataset():
             np.save(PATH + 'y_train_norm.npy', y_train_norm)
             x_train_norm = np.memmap(PATH+'x_train_norm.npy',dtype=cfg['data_type'],mode='r+',shape=(x_train.shape))
 
-            print('x_train_norm read',x_train_norm[:,:,68,1])
-            np.savetxt("/data/test/x_train_norm_read.csv",x_train_norm[:,:,45,4],delimiter=",")
+            
             x_test_norm = np.memmap(PATH+'x_test_norm.npy',dtype=cfg['data_type'],mode='r+',shape=(x_test.shape))
 
 

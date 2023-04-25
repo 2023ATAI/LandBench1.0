@@ -61,17 +61,17 @@ class ConvLSTMCell(nn.Module):
 
         return h_cur, c_cur
 
-    def init_hidden(self, batch_size, cuda=True):
+    def init_hidden(self, batch_size, cfg,cuda=True):
         state = (Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)),
                  Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)))
         if cuda:
-            state = (state[0].cuda(), state[1].cuda())
+            state = (state[0].cuda(cfg['device']), state[1].cuda(cfg['device']))
         return state
 
 
 class ConvLSTM(nn.Module):
 
-    def __init__(self, input_size, input_dim, hidden_dim, kernel_size, num_layers,
+    def __init__(self, input_size, input_dim, hidden_dim, kernel_size, num_layers,cfg,
                  batch_first=False, bias=True, return_all_layers=False):
         super(ConvLSTM, self).__init__()
 
@@ -84,7 +84,7 @@ class ConvLSTM(nn.Module):
             raise ValueError('Inconsistent list length.')
 
         self.height, self.width = input_size
-
+        self.cfg = cfg
         self.input_dim  = input_dim
         self.hidden_dim = hidden_dim
         self.kernel_size = kernel_size
@@ -163,7 +163,7 @@ class ConvLSTM(nn.Module):
     def get_init_states(self, batch_size, cuda=True):
         init_states = []
         for i in range(self.num_layers):
-            init_states.append(self.cell_list[i].init_hidden(batch_size, cuda))
+            init_states.append(self.cell_list[i].init_hidden(batch_size,self.cfg, cuda))
         return init_states
 
     @staticmethod
