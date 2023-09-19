@@ -14,11 +14,19 @@ only the results of one random day (135-th) in 2020 were used for verification.
 ### Figure 3. 
 Same as Fig. 2 but for global surface sensible heat fluxes (J/m2).
 
-### 
+### Figure 4. 
+The predictive performance of different DL predictive models for soil moisture and
+sensible heat flux at a spatial distribution of 1-degree and a 1-day lead time, measured by RMSE, R, and bias. Results for each variable are presented in the top row for CNN model, the
+subsequent two rows for ConvLSTM and LSTM with a 7-timestep models, respectively, and the
+final row for LSTM with a 365-timestep model.
 
-### 
+### Figure 5. 
+(a) Randomly selected grids on the global map and (b-f) one-year time series of soil
+moisture in different grids. The time series were generated with 1-day lead time using the LSTM
+with a 365-timestep model (perform the best among all DL models) and processed-based model.
 
-### 
+### Figure 6. 
+Same as Fig. 5 but for global surface sensible heat fluxes (J/m2).
 
 ### 
 
