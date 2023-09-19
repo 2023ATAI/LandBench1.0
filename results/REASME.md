@@ -1,14 +1,27 @@
 # Overview
 
-### Why use LandBench?
+### Figure 1. 
+Root mean squared error (RMSE) of (a) soil moisture at 20 cm depth and (b) surface sensible heat fluxes for different baselines at 1-, 2-, and 4-degree resolution for 1- and 5-day lead time
 
-The advancements in deep learning methods have presented new opportunities and challenges for predicting **land surface variables (LSVs)** due to their similarity with computer sciences tasks.
+### Figure 2. 
+Global soil moisture (m3/m3) of ERA5-land and various DL predictive models at
+1-degree resolution. The top row depicts the ERA5-Land ‘truth’ fields for layer 1 (0-7 cm) with
+1- and 5-day lead times. The other predictive models are the CNN (second row), ConvLSTM
+(third row), LSTM with 7-timestep (fourth row), and LSTM with 365-timestep (last row). The
+red words on the graph indicate the median performance of each model in the test set. Note that
+only the results of one random day (135-th) in 2020 were used for verification.
 
-However, the lack of a benchmark dataset hampers fair comparisons of different data-driven deep learning models for LSVs predictions. 
+### Figure 3. 
+Same as Fig. 2 but for global surface sensible heat fluxes (J/m2).
 
-Hence, we propose a LSVs benchmark dataset and prediction toolbox to boost research in data-driven LSVs modeling and improve the consistency of data-driven deep learning models for LSVs.
+### 
 
-**The LSVs benchmark dataset is hosted here(https://doi.org/10.11888/Atmos.tpdc.300294)**<br>
-**The prediction toolbox is hosted here(https://github.com/2023ATAI/LandBench1.0)**
+### 
 
-### Installation
+### 
+
+### 
+
+### 
+
+### 
