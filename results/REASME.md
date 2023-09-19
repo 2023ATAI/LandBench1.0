@@ -28,7 +28,8 @@ with a 365-timestep model (perform the best among all DL models) and processed-b
 ### Figure 6. 
 Same as Fig. 5 but for global surface sensible heat fluxes (J/m2).
 
-### 
+### Figure S1.  
+Correlation coefficient (R) of (a) soil moisture and (b) surface sensible heat fluxes for different baselines at 1-, 2-, and 4-degree resolution for 1- and 5-day lead time.
 
 ### 
 
